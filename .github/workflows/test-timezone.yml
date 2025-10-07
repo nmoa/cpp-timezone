@@ -1,0 +1,60 @@
+name: Test __TIME__ Macro with Different Timezones
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build-default-tz:
+    runs-on: ubuntu-latest
+    name: Build with Default TZ
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install dependencies
+      run: sudo apt-get update && sudo apt-get install -y cmake build-essential
+    
+    - name: Configure CMake
+      run: cmake -B build
+    
+    - name: Build
+      run: cmake --build build
+    
+    - name: Run program
+      run: |
+        echo "Running with default TZ (no TZ environment variable set):"
+        ./build/timezone_test
+        
+  build-tokyo-tz:
+    runs-on: ubuntu-latest
+    name: Build with TZ=Asia/Tokyo
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install dependencies
+      run: sudo apt-get update && sudo apt-get install -y cmake build-essential
+    
+    - name: Set TZ environment variable
+      run: echo "TZ=Asia/Tokyo" >> $GITHUB_ENV
+    
+    - name: Configure CMake
+      run: cmake -B build
+      env:
+        TZ: Asia/Tokyo
+    
+    - name: Build
+      run: cmake --build build
+      env:
+        TZ: Asia/Tokyo
+    
+    - name: Run program
+      run: |
+        echo "Running with TZ=Asia/Tokyo:"
+        ./build/timezone_test
+      env:
+        TZ: Asia/Tokyo
